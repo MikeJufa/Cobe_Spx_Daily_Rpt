@@ -37,20 +37,19 @@ SQL SELECT
 FROM CSV (header on, delimiter ",", quote """") "CSV_source";
 
 [CSV_source]:
-LOAD	[Symbol],
-	[Call/Put],
-	[Expiration],
-	[Strike Price],
-	[Volume],
-	[Matched],
-	[Routed],
-	[Bid Size],
-	[Bid Price],
-	[Ask Size],
-	[Ask Price],
-	[Last Price]
-RESIDENT RestConnectorMasterTable;
+LOAD	
+	[Symbol]
+	, [Call/Put]
+	, [Expiration]
+	, Num([Strike Price],'###0') as [Strike]
+	, Num([Volume],'#,##0') as Vol
+	, Money([Last Price]) as [LastPrice]
+    , '2023-05-12' as [Trade Date] //Start Date is Friday 2023-05-12, 6602 rows data.
+RESIDENT RestConnectorMasterTable
+Where Match ([Symbol],'SPX')
+;
 
+Store RestConnectorMasterTable into [lib://DataFiles/Auto_COBE_SPX_Option_Data.qvd](qvd);
 
 DROP TABLE RestConnectorMasterTable;
 
